@@ -14,7 +14,7 @@ createRoot(document.getElementById("root")!).render(
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     const swUrl = new URL("sw.js", document.baseURI).href;
-    navigator.serviceWorker.register(swUrl).catch(() => {
+    navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' }).then((reg) => reg.update()).catch(() => {
       /* registration unavailable (e.g. unsupported context) */
     });
   });

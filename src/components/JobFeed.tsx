@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useLang } from '../i18n';
+import { useDynamicJobs } from '../hooks/useDynamicJobs';
 import Reveal from './Reveal';
 import { IconPin, IconClock, IconBriefcase, IconArrowRight, IconStar } from './icons';
 
 type Cat = 'all' | 'esm' | 'youth' | 'govt';
 
-/* Dual job & career feed with colour-coded category badges and filters. */
 export default function JobFeed() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [cat, setCat] = useState<Cat>('all');
 
-  const jobs = t.jobs.jobs;
+  const { jobs: dynamicJobs, updatedAt } = useDynamicJobs(lang);
+  const jobs = [...dynamicJobs, ...t.jobs.jobs];
   const filtered = cat === 'all' ? jobs : jobs.filter((j) => j.cat === cat);
 
   const tabs: { id: Cat; label: string; count: number }[] = [
@@ -30,7 +31,6 @@ export default function JobFeed() {
     <section id="jobs" className="camo-light relative scroll-mt-24 text-ink-900">
       <div className="noise-overlay" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-20 lg:py-24">
-        {/* Section head */}
         <Reveal>
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 font-display uppercase tracking-[0.24em] text-[11px] text-olive-600">
@@ -41,10 +41,17 @@ export default function JobFeed() {
               {t.jobs.heading}
             </h2>
             <p className="mt-4 text-olive-600 text-[15px] leading-relaxed">{t.jobs.sub}</p>
+            {updatedAt && (
+              <p className="mt-2 font-mono text-[11px] text-olive-500">
+                {lang === 'hi' ? 'अंतिम अपडेट' : 'Jobs last updated'}:{' '}
+                {new Date(updatedAt).toLocaleString(lang === 'hi' ? 'hi-IN' : 'en-IN', {
+                  day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                })}
+              </p>
+            )}
           </div>
         </Reveal>
 
-        {/* Filter tabs */}
         <Reveal delay={120}>
           <div className="mt-9 flex flex-wrap gap-2.5">
             {tabs.map((tab) => (
@@ -72,12 +79,10 @@ export default function JobFeed() {
           </div>
         </Reveal>
 
-        {/* Job grid */}
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((job, i) => (
-            <Reveal key={job.title} delay={(i % 3) * 90}>
+            <Reveal key={`${job.id ?? job.title}-${i}`} delay={(i % 3) * 90}>
               <article className="group h-full flex flex-col bg-cream-50 border border-olive-500/30 rounded-sm p-5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[8px_8px_0_rgba(27,36,22,0.85)] hover:border-camo-900">
-                {/* Badge row */}
                 <div className="flex items-start justify-between gap-3">
                   <span
                     className={`inline-block font-display font-semibold uppercase tracking-[0.12em] text-[10.5px] px-2.5 py-1.5 rounded-sm ${badgeStyle[job.cat]}`}
@@ -97,7 +102,6 @@ export default function JobFeed() {
                 </h3>
                 <p className="mt-1 text-[13px] text-olive-600 font-medium">{job.org}</p>
 
-                {/* Meta */}
                 <ul className="mt-4 space-y-2 text-[12.5px] text-camo-700">
                   <li className="flex items-center gap-2.5">
                     <IconPin width={14} height={14} className="text-olive-500 shrink-0" />
@@ -106,13 +110,15 @@ export default function JobFeed() {
                   <li className="flex items-center gap-2.5">
                     <IconClock width={14} height={14} className="text-olive-500 shrink-0" />
                     {t.jobs.deadline}: <strong className="text-camo-900">{job.deadline}</strong>
-                    <span
-                      className={`ml-auto font-mono text-[10.5px] font-bold px-2 py-0.5 rounded-sm ${
-                        job.days <= 15 ? 'bg-brick-500/15 text-brick-500' : 'bg-olive-600/12 text-olive-600'
-                      }`}
-                    >
-                      {job.days} {t.jobs.daysLeft}
-                    </span>
+                    {job.days < 999 && (
+                      <span
+                        className={`ml-auto font-mono text-[10.5px] font-bold px-2 py-0.5 rounded-sm ${
+                          job.days <= 15 ? 'bg-brick-500/15 text-brick-500' : 'bg-olive-600/12 text-olive-600'
+                        }`}
+                      >
+                        {job.days} {t.jobs.daysLeft}
+                      </span>
+                    )}
                   </li>
                   <li className="flex items-center gap-2.5">
                     <IconBriefcase width={14} height={14} className="text-olive-500 shrink-0" />
@@ -120,7 +126,6 @@ export default function JobFeed() {
                   </li>
                 </ul>
 
-                {/* Tags */}
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {job.tags.map((tag) => (
                     <span key={tag} className="text-[10.5px] font-medium bg-cream-200 text-camo-700 border border-olive-500/25 px-2 py-1 rounded-sm">
@@ -128,14 +133,18 @@ export default function JobFeed() {
                     </span>
                   ))}
                 </div>
-
-                <a
-                  href="#csc"
-                  className="mt-5 pt-4 border-t border-dashed border-olive-500/40 inline-flex items-center justify-between font-display font-semibold uppercase tracking-[0.12em] text-[12.5px] text-camo-900 group-hover:text-gold-600 transition-colors"
-                >
-                  {t.jobs.apply}
-                  <IconArrowRight width={16} height={16} className="transition-transform duration-300 group-hover:translate-x-1.5" strokeWidth={2.2} />
-                </a>
+                <div className="mt-5 pt-4 border-t border-dashed border-olive-500/40 flex flex-col gap-2">
+                  {job.link && (
+                    <a href={job.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-between font-display font-semibold uppercase tracking-[0.12em] text-[12.5px] text-camo-900 group-hover:text-gold-600 transition-colors">
+                      {t.jobs.viewNotification}
+                      <IconArrowRight width={16} height={16} strokeWidth={2.2} />
+                    </a>
+                  )}
+                  <a href="#csc" className="inline-flex items-center justify-between font-display font-semibold uppercase tracking-[0.12em] text-[12.5px] text-olive-600 hover:text-camo-900 transition-colors">
+                    {t.jobs.apply}
+                    <IconArrowRight width={14} height={14} strokeWidth={2.2} />
+                  </a>
+                </div>
               </article>
             </Reveal>
           ))}

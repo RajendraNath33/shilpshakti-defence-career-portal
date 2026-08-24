@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLang } from '../i18n';
 import type { Lang } from '../i18n';
 import { ShieldLogo, IconMenu, IconX, IconChevron, IconPhone } from './icons';
+import GoogleLoginButton from './GoogleLogin';
 
 /* Sticky header: brand, nav, EN|HI toggle, Get Started CTA and mobile drawer. */
 export default function Header() {
@@ -107,6 +108,10 @@ export default function Header() {
                     {l === 'en' ? 'EN' : 'हिंदी'}
                   </button>
                 ))}
+              </div>
+
+              <div className="hidden sm:block">
+                <GoogleLoginButton compact />
               </div>
 
               <a

@@ -27,7 +27,6 @@ const en = {
       'Agniveer Rally — Kumaon Regiment, Ranikhet: physical tests from next month',
       'Uttarakhand Police SI (Civil) — 400+ vacancies, online form filling assistance at Haldwani Kendra',
       'ZSB / DGR registration drive every Saturday — walk in with discharge book',
-      'Bank Security Officer (ESM Quota) — Public Sector Bank, Haldwani branch',
     ],
   },
   hero: {
@@ -67,6 +66,7 @@ const en = {
     filters: { all: 'All Notices', esm: 'ESM Quota', youth: 'Youth & Student', govt: 'Govt. Civilian' },
     badges: { esm: 'ESM Quota Special', youth: 'Youth & Student Career', govt: 'Govt Civilian Job' },
     apply: 'Apply via CSC',
+    viewNotification: 'View Notification',
     newTag: 'NEW',
     daysLeft: 'days left',
     vacancies: 'Posts',
@@ -75,7 +75,6 @@ const en = {
       {
         cat: 'esm' as const,
         isNew: true,
-        title: 'Bank Security Officer',
         org: 'Public Sector Bank, Haldwani',
         location: 'Haldwani, Uttarakhand',
         deadline: '28 Feb 2026',
@@ -496,6 +495,7 @@ const hi: Dict = {
     filters: { all: 'सभी सूचनाएँ', esm: 'ESM कोटा', youth: 'युवा एवं छात्र', govt: 'सरकारी सिविल' },
     badges: { esm: 'ESM कोटा विशेष', youth: 'युवा एवं छात्र करियर', govt: 'सरकारी सिविल नौकरी' },
     apply: 'CSC से आवेदन करें',
+    viewNotification: 'सूचना देखें',
     newTag: 'नया',
     daysLeft: 'दिन शेष',
     vacancies: 'पद',

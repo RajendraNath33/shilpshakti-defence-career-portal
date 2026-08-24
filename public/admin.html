@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>ShilpShakti — Admin Panel</title>
+<style>
+  :root {
+    --bg: #1b2416;
+    --panel: #f4efe4;
+    --ink: #1b2416;
+    --accent: #b58a2c;
+    --danger: #a5342a;
+    --ok: #3a6b35;
+    --border: #cfc4a8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 24px 16px 80px;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  h1 { color: #f4efe4; font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #c9c2ab; font-size: 0.85rem; margin-bottom: 24px; }
+  .card {
+    background: var(--panel);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+  label { display: block; font-size: 0.8rem; font-weight: 600; margin: 12px 0 4px; color: #4a4230; }
+  input, select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.92rem;
+    background: #fff;
+    font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 44px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .lang-block { border: 1px dashed var(--border); border-radius: 6px; padding: 10px 12px; margin-top: 10px; }
+  .lang-block h3 { margin: 0 0 4px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 18px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .btn-primary { background: var(--accent); color: #1b2416; margin-top: 18px; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--ink); }
+  #unlockCard input { margin-top: 6px; }
+  #app { display: none; }
+  .job-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 0.85rem; gap: 10px;
+  }
+  .job-item:last-child { border-bottom: none; }
+  .job-meta { color: #6b6248; font-size: 0.78rem; }
+  .job-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .job-actions button { padding: 5px 10px; font-size: 0.78rem; }
+  #status { margin-top: 12px; font-size: 0.85rem; font-weight: 600; }
+  #status.ok { color: var(--ok); }
+  #status.err { color: var(--danger); }
+  .hint { font-size: 0.75rem; color: #7a7057; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ShilpShakti — Job Admin Panel</h1>
+  <div class="sub">Manually add local jobs/news (from WhatsApp etc). Only visible to you — not linked from the main site.</div>
+
+  <div class="card" id="unlockCard">
+    <label>Admin Password</label>
+    <input type="password" id="pwInput" placeholder="Enter password" />
+    <button class="btn-primary" onclick="unlock()">Unlock</button>
+    <div id="unlockStatus"></div>
+  </div>
+
+  <div id="app">
+    <div class="card">
+      <h2 id="formTitle" style="margin-top:0;">Add New Job</h2>
+      <input type="hidden" id="jobId" />
+
+      <label>Category</label>
+      <select id="cat">
+        <option value="esm">ESM (Ex-Servicemen)</option>
+        <option value="youth">Youth / Student</option>
+        <option value="govt">Govt Civilian</option>
+      </select>
+
+      <div class="row2">
+        <div>
+          <label>Deadline (last date to apply)</label>
+          <input type="date" id="deadlineISO" />
+        </div>
+        <div>
+          <label>No. of Posts</label>
+          <input type="text" id="posts" placeholder="e.g. 05 or leave blank" />
+        </div>
+      </div>
+
+      <div class="lang-block">
+        <h3>English</h3>
+        <label>Title</label>
+        <input type="text" id="titleEn" placeholder="e.g. Security Guard Vacancy" />
+        <label>Organisation</label>
+        <input type="text" id="orgEn" placeholder="e.g. XYZ Company" />
+        <label>Location</label>
+        <input type="text" id="locationEn" placeholder="e.g. Haldwani, Uttarakhand" />
+        <label>Tags (comma separated)</label>
+        <input type="text" id="tagsEn" placeholder="e.g. 12th Pass, Ex-Servicemen" />
+      </div>
+
+      <div class="lang-block">
+        <h3>Hindi</h3>
+        <label>Title</label>
+        <input type="text" id="titleHi" placeholder="जैसे सुरक्षा गार्ड भर्ती" />
+        <label>Organisation</label>
+        <input type="text" id="orgHi" placeholder="जैसे XYZ कंपनी" />
+        <label>Location</label>
+        <input type="text" id="locationHi" placeholder="जैसे हल्द्वानी, उत्तराखंड" />
+        <label>Tags (comma separated)</label>
+        <input type="text" id="tagsHi" placeholder="जैसे 12वीं पास, पूर्व सैनिक" />
+        <div class="hint">Hindi fields खाली छोड़ें तो English वाला content ही use हो जाएगा।</div>
+      </div>
+
+      <label>Raw notes (optional — paste WhatsApp message here for your own reference)</label>
+      <textarea id="rawNotes" placeholder="Paste the original WhatsApp message here..."></textarea>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-primary" onclick="submitJob()">Save Job</button>
+        <button class="btn-ghost" onclick="resetForm()">Clear / New</button>
+      </div>
+      <div id="status"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;">Your Manually Added Jobs</h2>
+      <div id="jobList">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==== CONFIGURE THIS ====
+  // Point this at your n8n webhook. If you set up the nginx proxy path
+  // (recommended, see setup notes), leave it as the relative path below.
+  // Otherwise replace with your full n8n URL, e.g.
+  // "https://your-vm-ip:5679/webhook/shilpshakti-admin"
+  const WEBHOOK_URL = 'https://n8n.shilpshakti.org.in/webhook/shilpshakti-admin';
+  // =========================
+
+  let ADMIN_PASSWORD = '';
+
+  function unlock() {
+    const pw = document.getElementById('pwInput').value;
+    if (!pw) return;
+    ADMIN_PASSWORD = pw;
+    document.getElementById('unlockCard').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadJobs();
+  }
+
+  function resetForm() {
+    document.getElementById('jobId').value = '';
+    document.getElementById('formTitle').textContent = 'Add New Job';
+    ['cat','deadlineISO','posts','titleEn','orgEn','locationEn','tagsEn','titleHi','orgHi','locationHi','tagsHi','rawNotes']
+      .forEach((id) => { document.getElementById(id).value = ''; });
+    document.getElementById('cat').value = 'esm';
+    setStatus('', '');
+  }
+
+  function setStatus(msg, cls) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = cls || '';
+  }
+
+  function formatDisplayDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso + 'T00:00:00');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${String(d.getDate()).padStart(2,'0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  async function submitJob() {
+    const payload = {
+      action: 'add',
+      password: ADMIN_PASSWORD,
+      id: document.getElementById('jobId').value || undefined,
+      cat: document.getElementById('cat').value,
+      deadlineISO: document.getElementById('deadlineISO').value,
+      deadlineDisplay: formatDisplayDate(document.getElementById('deadlineISO').value),
+      posts: document.getElementById('posts').value,
+      titleEn: document.getElementById('titleEn').value,
+      orgEn: document.getElementById('orgEn').value,
+      locationEn: document.getElementById('locationEn').value,
+      tagsEn: document.getElementById('tagsEn').value,
+      titleHi: document.getElementById('titleHi').value,
+      orgHi: document.getElementById('orgHi').value,
+      locationHi: document.getElementById('locationHi').value,
+      tagsHi: document.getElementById('tagsHi').value,
+    };
+
+    if (!payload.titleEn || !payload.orgEn || !payload.deadlineISO) {
+      setStatus('Title, Organisation aur Deadline zaroori hain.', 'err');
+      return;
+    }
+
+    setStatus('Saving…', '');
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus('Saved ✓', 'ok');
+        resetForm();
+        loadJobs();
+      } else {
+        setStatus('Error: ' + (data.error || 'unknown'), 'err');
+      }
+    } catch (e) {
+      setStatus('Network error: ' + e.message, 'err');
+    }
+  }
+
+  function editJob(job) {
+    document.getElementById('jobId').value = job.id;
+    document.getElementById('formTitle').textContent = 'Edit Job';
+    document.getElementById('cat').value = job.cat;
+    document.getElementById('deadlineISO').value = job.deadlineISO || '';
+    document.getElementById('posts').value = job.posts || '';
+    document.getElementById('titleEn').value = job.titleEn || '';
+    document.getElementById('orgEn').value = job.orgEn || '';
+    document.getElementById('locationEn').value = job.locationEn || '';
+    document.getElementById('tagsEn').value = job.tagsEn || '';
+    document.getElementById('titleHi').value = job.titleHi || '';
+    document.getElementById('orgHi').value = job.orgHi || '';
+    document.getElementById('locationHi').value = job.locationHi || '';
+    document.getElementById('tagsHi').value = job.tagsHi || '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function deleteJob(id) {
+    if (!confirm('Delete this job?')) return;
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', password: ADMIN_PASSWORD, id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadJobs();
+      } else {
+        alert('Error: ' + (data.error || 'unknown'));
+      }
+    } catch (e) {
+      alert('Network error: ' + e.message);
+    }
+  }
+
+  async function loadJobs() {
+    const list = document.getElementById('jobList');
+    try {
+      const res = await fetch('/news.json', { cache: 'no-store' });
+      const data = await res.json();
+      const manual = (data.en || []).filter((j) => j.isManual);
+      if (!manual.length) {
+        list.innerHTML = '<div class="hint">Abhi koi manual job nahi hai.</div>';
+        return;
+      }
+      list.innerHTML = manual
+        .map(
+          (j) => `
+        <div class="job-item">
+          <div>
+            <strong>${j.title}</strong> — ${j.org}
+            <div class="job-meta">${j.location} • ${j.deadline} • ${j.days} days left</div>
+          </div>
+          <div class="job-actions">
+            <button class="btn-ghost" onclick='editJob(${JSON.stringify({
+              id: j.id, cat: j.cat, deadlineISO: j.deadlineISO, posts: j.posts,
+              titleEn: j.title, orgEn: j.org, locationEn: j.location, tagsEn: (j.tags||[]).join(', ')
+            })})'>Edit</button>
+            <button class="btn-danger" onclick="deleteJob('${j.id}')">Delete</button>
+          </div>
+        </div>`
+        )
+        .join('');
+    } catch (e) {
+      list.innerHTML = '<div class="hint">news.json load nahi ho payi.</div>';
+    }
+  }
+</script>
+</body>
+</html>

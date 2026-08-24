@@ -1,0 +1,28 @@
+{
+  "name": "ShilpShakti Defence & Career Portal",
+  "short_name": "ShilpShakti",
+  "description": "Military-to-civilian C.V builder, AI passport photo studio, govt links and assisted CSC services by Divya Seva CSC Kendra, Haldwani.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1b2416",
+  "theme_color": "#1b2416",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "government", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
