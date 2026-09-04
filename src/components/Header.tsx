@@ -5,7 +5,13 @@ import { ShieldLogo, IconMenu, IconX, IconChevron, IconPhone } from './icons';
 import GoogleLoginButton from './GoogleLogin';
 
 /* Sticky header: brand, nav, EN|HI toggle, Get Started CTA and mobile drawer. */
-export default function Header() {
+export default function Header({
+  onOpenPptGenerator,
+  onLogoClick,
+}: {
+  onOpenPptGenerator: () => void;
+  onLogoClick: () => void;
+}) {
   const { t, lang, setLang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -36,6 +42,7 @@ export default function Header() {
     { href: '#cv', label: t.nav.cvBuilder },
     { href: '#photo', label: t.nav.photoStudio },
     { href: '#csc', label: t.nav.cscAssist },
+    { href: '#ppt', label: t.nav.pptGenerator },
     { href: '#govt-links', label: t.nav.govtLinks },
   ];
 
@@ -52,7 +59,15 @@ export default function Header() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex items-center justify-between gap-3 sm:gap-4 h-[68px]">
             {/* Brand */}
-            <a href="#top" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+            
+            <a
+  href="#top"
+  onClick={(e) => {
+    e.preventDefault();
+    onLogoClick();
+  }}
+  className="flex items-center gap-2.5 sm:gap-3 group shrink-0"
+>
               <ShieldLogo
                 size={40}
                 className="drop-shadow-[0_2px_6px_rgba(255,201,71,0.35)] transition-transform duration-300 group-hover:-translate-y-0.5"
@@ -73,6 +88,12 @@ export default function Header() {
                 <a
                   key={l.href}
                   href={l.href}
+                  onClick={(e) => {
+                    if (l.href === '#ppt') {
+                      e.preventDefault();
+                      onOpenPptGenerator();
+                    }
+                  }}
                   className="relative px-2.5 py-2 text-[13px] font-medium text-cream-200 hover:text-gold-300 transition-colors group/link whitespace-nowrap"
                 >
                   {l.label}
@@ -114,10 +135,7 @@ export default function Header() {
                 <GoogleLoginButton compact />
               </div>
 
-              <a
-                href="#cv"
-                className="hidden md:inline-flex items-center gap-2 btn-stamp bg-gold-400 text-camo-950 font-display font-semibold uppercase tracking-[0.1em] text-[13px] px-5 py-2.5 rounded-sm"
-              >
+              <a href="#cv" className="hidden md:inline-flex items-center gap-2 btn-stamp bg-gold-400 text-camo-950 font-display font-semibold uppercase tracking-[0.1em] text-[13px] px-5 py-2.5 rounded-sm">
                 {t.nav.getStarted}
                 <IconChevron width={15} height={15} strokeWidth={2.4} />
               </a>
@@ -175,7 +193,7 @@ export default function Header() {
               <a
                 key={l.href}
                 href={l.href}
-                onClick={() => setMenuOpen(false)}
+                  onClick={(e) => { if (l.href === "#ppt") { e.preventDefault(); onOpenPptGenerator(); } setMenuOpen(false); }}
                 style={{ transitionDelay: menuOpen ? `${80 + i * 45}ms` : '0ms' }}
                 className={`flex items-center justify-between py-3.5 border-b border-camo-800 last:border-0 text-cream-100 hover:text-gold-300 transition-all duration-300 ${
                   menuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
@@ -188,17 +206,10 @@ export default function Header() {
           </nav>
 
           <div className="px-5 pb-6 pt-4 border-t border-camo-700 shrink-0 space-y-3">
-            <a
-              href="#cv"
-              onClick={() => setMenuOpen(false)}
-              className="w-full inline-flex justify-center items-center gap-2 btn-stamp bg-gold-400 text-camo-950 font-display font-semibold uppercase tracking-[0.1em] text-[13px] px-5 py-3 rounded-sm"
-            >
+            <a href="#cv" onClick={() => setMenuOpen(false)} className="w-full inline-flex justify-center items-center gap-2 btn-stamp bg-gold-400 text-camo-950 font-display font-semibold uppercase tracking-[0.1em] text-[13px] px-5 py-3 rounded-sm">
               {t.nav.getStarted}
             </a>
-            <a
-              href={`tel:${t.footer.phones[0].replace(/[^\d+]/g, '')}`}
-              className="w-full inline-flex justify-center items-center gap-2 border-2 border-olive-400 text-cream-200 hover:border-gold-400 hover:text-gold-300 font-display font-semibold uppercase tracking-[0.08em] text-[12.5px] px-5 py-2.5 rounded-sm transition-colors"
-            >
+            <a href={`tel:${t.footer.phones[0].replace(/[^\d+]/g, '')}`} className="w-full inline-flex justify-center items-center gap-2 border-2 border-olive-400 text-cream-200 hover:border-gold-400 hover:text-gold-300 font-display font-semibold uppercase tracking-[0.08em] text-[12.5px] px-5 py-2.5 rounded-sm transition-colors">
               <IconPhone width={14} height={14} />
               {t.footer.phones[0]}
             </a>
