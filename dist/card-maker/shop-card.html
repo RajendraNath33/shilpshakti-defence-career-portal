@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>दुकान / विज़िटिंग कार्ड मेकर</title>
+<style>
+:root{--ink:#1d2733;--mut:#5d6b7a;--line:#d5dbe2;--bg:#eef1f4;--acc:#0b6e4f}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans Devanagari","Mangal",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{padding:14px 20px;background:var(--ink);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:1.15rem;margin:0}
+header a{color:#cfe9df;font-size:.9rem}
+main{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:20px;padding:20px;max-width:1100px;margin:auto}
+@media(max-width:800px){main{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 8px 28px rgba(29,39,51,.06)}
+fieldset{border:0;padding:0;margin:0 0 14px}
+legend{font-weight:700;margin-bottom:6px}
+label{display:block;font-size:.88rem;color:var(--mut);margin:8px 0 2px}
+input[type=text],input[type=tel],textarea,select{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;font:inherit;color:var(--ink)}
+textarea{min-height:64px;resize:vertical}
+.types{display:flex;gap:6px}
+.types label{flex:1;margin:0}
+.types input{position:absolute;opacity:0}
+.types span{display:block;text-align:center;padding:9px 4px;border:1px solid var(--line);border-radius:6px;cursor:pointer;color:var(--ink)}
+.types input:checked+span{background:var(--acc);color:#fff;border-color:var(--acc)}
+.types input:focus-visible+span,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
+.sw{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sw button{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.sw input[type=color]{width:44px;height:34px;padding:0;border:1px solid var(--line);border-radius:6px}
+.tpl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tpl button{position:relative;min-height:76px;padding:12px 10px 10px 15px;border:1px solid #dce2e8;border-left:5px solid var(--acc);background:linear-gradient(135deg,#fff 0%,#f7f9fb 100%);border-radius:10px;font:inherit;font-size:.88rem;font-weight:700;text-align:left;cursor:pointer;color:var(--ink);box-shadow:0 2px 5px rgba(25,39,51,.04);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.tpl button:before{content:' ';position:absolute;right:10px;top:10px;width:22px;height:22px;border-radius:7px;background:var(--tpl-color,var(--acc));opacity:.16}.tpl button:hover{transform:translateY(-2px);box-shadow:0 7px 16px rgba(25,39,51,.12);border-color:var(--tpl-color,var(--acc))}.tpl button:focus-visible{outline:3px solid #f2a900;outline-offset:2px}.tpl button.active{box-shadow:0 0 0 2px var(--tpl-color,var(--acc)),0 6px 14px rgba(25,39,51,.1);background:#fff}
+.stage{position:sticky;top:12px;align-self:start}
+canvas{width:100%;height:auto;display:block;border-radius:14px;box-shadow:0 12px 34px rgba(0,0,0,.18);background:#fff}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button.b{padding:10px 14px;border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:6px;font:inherit;cursor:pointer}
+button.p{background:var(--acc);border-color:var(--acc);color:#fff}
+.side{margin-top:8px;color:var(--mut);font-size:.9rem}
+.note{font-size:.82rem;color:var(--mut);margin-top:10px}
+</style>
+</head>
+<body>
+<header><h1>दुकान / विज़िटिंग कार्ड मेकर</h1><a href="/">← वापस पोर्टल पर</a></header>
+<main>
+<section class="panel" aria-label="कार्ड की जानकारी">
+<fieldset><legend>0. तैयार टेम्पलेट चुनें (या सीधे नीचे भरें)</legend><div class="tpl" id="tpl"></div></fieldset>
+<fieldset><legend>1. कार्ड का प्रकार</legend>
+<div class="types">
+<label><input type="radio" name="type" value="shop" checked><span>दुकान</span></label>
+<label><input type="radio" name="type" value="visit"><span>विज़िटिंग</span></label>
+<label><input type="radio" name="type" value="id"><span>आईडी</span></label>
+</div></fieldset>
+<fieldset><legend>2. रंग</legend>
+<div class="sw" id="sw"></div>
+<label for="lay">डिज़ाइन स्टाइल</label><select id="lay"><option value="band">साइड पट्टी</option><option value="top">ऊपर-नीचे पट्टी</option><option value="dark">गहरा रंग</option></select></fieldset>
+<fieldset><legend>3. जानकारी</legend>
+<label for="name">नाम / दुकान का नाम</label><input type="text" id="name" value="दिव्य सेवा CSC केंद्र">
+<label for="role">पद या टैगलाइन</label><input type="text" id="role" value="सरकारी सेवाओं का एक ठिकाना">
+<label for="phone">मोबाइल</label><input type="tel" id="phone" value="98XXXXXXXX">
+<label for="addr">पता</label><textarea id="addr">मुख्य बाज़ार, हल्द्वानी, उत्तराखंड</textarea>
+<label for="svc">सेवाएं (हर लाइन में एक)</label><textarea id="svc">आधार और पैन सेवाएं
+ऑनलाइन फॉर्म
+फोटो और प्रिंटिंग
+CV और रोज़गार सहायता</textarea>
+<label for="logo">लोगो / फोटो</label><input type="file" id="logo" accept="image/*">
+</fieldset>
+<p class="note">सारी जानकारी सिर्फ़ आपके ब्राउज़र में रहती है, कहीं भेजी नहीं जाती। लोगो/फोटो सेव नहीं होता, दोबारा चुनना होगा।</p>
+</section>
+<section class="stage" aria-label="प्रीव्यू">
+<canvas id="cv" width="1050" height="630" role="img" aria-label="कार्ड प्रीव्यू"></canvas>
+<div class="side" id="sidelbl">फ्रंट</div>
+<div class="bar">
+<button class="b" id="flip">पलटें (फ्रंट/बैक)</button>
+<button class="b p" id="png">PNG डाउनलोड (300 DPI)</button>
+<button class="b" id="pdf">PDF के लिए प्रिंट</button>
+<button class="b" id="a4">A4 पर 10 कार्ड</button>
+</div>
+<p class="note">PDF के लिए प्रिंट विंडो में "Save as PDF" चुनें। A4 शीट में पहले पेज पर फ्रंट और दूसरे पर बैक आता है।</p>
+</section>
+</main>
+<script>
+(function(){
+var W=1050,H=630,cv=document.getElementById('cv'),x=cv.getContext('2d');
+var cols=['#0b6e4f','#1f4e9c','#b3261e','#6a3fa0','#1d2733','#c26a00'];
+var color=cols[0],side=0,img=null;
+var F='"Noto Sans Devanagari","Mangal","Segoe UI",sans-serif';
+var $=function(i){return document.getElementById(i)};
+var ids=['name','role','phone','addr','svc','lay'];
+var sw=$('sw');
+cols.forEach(function(c){var b=document.createElement('button');b.style.background=c;b.title=c;b.setAttribute('aria-label','रंग '+c);b.onclick=function(){color=c;$('cc').value=c;save();draw()};sw.appendChild(b)});
+var cc=document.createElement('input');cc.type='color';cc.id='cc';cc.value=color;cc.setAttribute('aria-label','अपना रंग चुनें');cc.oninput=function(){color=cc.value;save();draw()};sw.appendChild(cc);
+function type(){return document.querySelector('input[name=type]:checked').value}
+function lines(){return $('svc').value.split('\n').map(function(s){return s.trim()}).filter(Boolean)}
+function fit(t,w,px,wt){var s=px;do{x.font=wt+' '+s+'px '+F;s-=2}while(x.measureText(t).width>w&&s>20);return s+2}
+function wrap(t,mw){var out=[];t.split('\n').forEach(function(p){var l='';p.split(' ').forEach(function(w){var n=l?l+' '+w:w;if(x.measureText(n).width>mw&&l){out.push(l);l=w}else l=n});out.push(l)});return out}
+function ink(c){var n=parseInt(c.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return (r*299+g*587+b*114)/1000>150?'#1d2733':'#fff'}
+function draw(){
+ var t=type(),fg=ink(color);
+ x.clearRect(0,0,W,H);
+ if(side===0){
+  var lay=$('lay').value,dk=lay==='dark',tx=dk?fg:'#1d2733',sb=dk?fg:'#5d6b7a',ac=dk?fg:color;
+  x.fillStyle=dk?color:'#fff';x.fillRect(0,0,W,H);
+  if(lay==='band'){x.fillStyle=color;x.fillRect(0,0,34,H)}
+  if(lay==='top'){x.fillStyle=color;x.fillRect(0,0,W,46);x.fillRect(0,H-20,W,20)}
+  var left=lay==='band'?84:70,right=W-60;
+  if(img){
+   if(t==='id'){x.save();x.beginPath();x.rect(84,90,250,320);x.clip();cover(img,84,90,250,320);x.restore();left=370}
+   else{x.save();x.beginPath();x.arc(W-140,130,80,0,7);x.clip();cover(img,W-220,50,160,160);x.restore();right=W-250}
+  }
+  var s=fit($('name').value,right-left,t==='visit'?72:64,'700');
+  x.font='700 '+s+'px '+F;x.fillStyle=tx;x.textBaseline='alphabetic';
+  x.fillText($('name').value,left,t==='id'?170:150);
+  x.font='400 32px '+F;x.fillStyle=sb;x.fillText($('role').value,left,t==='id'?222:208);
+  if(t==='shop'){x.font='400 32px '+F;x.fillStyle='#1d2733';lines().slice(0,4).forEach(function(l,i){x.fillStyle=ac;x.fillRect(left,278+i*52,12,12);x.fillStyle=tx;x.fillText(l,left+30,292+i*52)})}
+  if(t==='id'){x.font='400 30px '+F;x.fillStyle=sb;x.fillText('मोबाइल',left,300);x.font='700 40px '+F;x.fillStyle=tx;x.fillText($('phone').value,left,350)}
+  else{x.fillStyle=ac;x.fillRect(left,512,right-left,3);x.font='700 46px '+F;x.fillStyle=ac;x.fillText($('phone').value,left,580)}
+ }else{
+  x.fillStyle=color;x.fillRect(0,0,W,H);
+  x.fillStyle=fg;x.font='700 40px '+F;x.fillText($('name').value,60,100);
+  x.fillRect(60,122,120,4);
+  x.font='400 34px '+F;var y=190;
+  if(t==='visit'){lines().slice(0,4).forEach(function(l){x.fillText('• '+l,60,y);y+=48});y+=16}
+  wrap($('addr').value,W-120).slice(0,3).forEach(function(l){x.fillText(l,60,y);y+=46});
+  x.font='700 44px '+F;x.fillText($('phone').value,60,H-60);
+ }
+}
+function cover(im,dx,dy,dw,dh){var r=Math.max(dw/im.width,dh/im.height),w=im.width*r,h=im.height*r;x.drawImage(im,dx+(dw-w)/2,dy+(dh-h)/2,w,h)}
+var T=[
+{n:'CSC / जन सेवा केंद्र',t:'shop',l:'band',c:'#0b6e4f',name:'जन सेवा केंद्र',role:'सरकारी सेवाओं का एक ठिकाना',svc:'आधार और पैन सेवाएं\nऑनलाइन फॉर्म\nफोटो और प्रिंटिंग\nबैंकिंग सहायता',addr:'मुख्य बाज़ार, आपका शहर'},
+{n:'किराना / जनरल स्टोर',t:'shop',l:'top',c:'#c26a00',name:'शर्मा जनरल स्टोर',role:'घर का हर सामान, सही दाम पर',svc:'राशन और किराना\nहोम डिलीवरी\nथोक और खुदरा\nUPI स्वीकार',addr:'गांधी रोड, आपका शहर'},
+{n:'मेडिकल स्टोर',t:'shop',l:'top',c:'#1f4e9c',name:'सेवा मेडिकल स्टोर',role:'दवाइयाँ, जाँच और सलाह',svc:'सभी दवाइयाँ\nहोम डिलीवरी\nजेनेरिक दवाएं\n24 घंटे सेवा',addr:'अस्पताल रोड, आपका शहर'},
+{n:'मोबाइल रिपेयर',t:'shop',l:'dark',c:'#1d2733',name:'स्मार्ट मोबाइल केयर',role:'रिपेयर, रिचार्ज और एक्सेसरीज़',svc:'स्क्रीन और बैटरी\nसॉफ्टवेयर अपडेट\nरिचार्ज\nकवर और चार्जर',addr:'बस स्टैंड के पास, आपका शहर'},
+{n:'सैलून / पार्लर',t:'shop',l:'dark',c:'#6a3fa0',name:'रूप सैलून',role:'स्टाइल और केयर, एक जगह',svc:'हेयर कटिंग\nफेशियल\nब्राइडल मेकअप\nअपॉइंटमेंट सुविधा',addr:'सिटी मॉल रोड, आपका शहर'},
+{n:'विज़िटिंग: सादा',t:'visit',l:'band',c:'#1d2733',name:'राजेश कुमार',role:'प्रोपराइटर',svc:'सेवा 1\nसेवा 2\nसेवा 3',addr:'दुकान नं. 12, आपका शहर'},
+{n:'विज़िटिंग: रंगीन',t:'visit',l:'dark',c:'#1f4e9c',name:'अनीता देवी',role:'सलाहकार',svc:'परामर्श\nफॉर्म भरना\nदस्तावेज़ सहायता',addr:'सेक्टर 4, आपका शहर'},
+{n:'कर्मचारी आईडी',t:'id',l:'top',c:'#0b6e4f',name:'सुनील सिंह',role:'सहायक | ID: 0001',svc:'',addr:'यह कार्ड संस्था की संपत्ति है। मिलने पर कृपया लौटाएं.'},
+{n:'वकील / लीगल',t:'visit',l:'dark',c:'#17365d',name:'एडवोकेट आपका नाम',role:'अधिवक्ता | न्याय एवं परामर्श',svc:'सिविल एवं आपराधिक मामले\nकानूनी परामर्श\nदस्तावेज़ एवं ड्राफ्टिंग',addr:'जिला न्यायालय, आपका शहर'},
+{n:'NGO / सामाजिक संस्था',t:'visit',l:'top',c:'#8b4513',name:'जनकल्याण सेवा संस्थान',role:'सेवा • सहयोग • सशक्तिकरण',svc:'महिला एवं बाल विकास\nशिक्षा और स्वास्थ्य\nसामुदायिक सहायता',addr:'आपका कार्यालय पता'},
+{n:'रेस्टोरेंट / कैफे',t:'shop',l:'dark',c:'#8a2c20',name:'पहाड़ी स्वाद कैफे',role:'स्वाद जो दिल तक पहुँचे',svc:'पहाड़ी व्यंजन\nफैमिली डाइनिंग\nटेकअवे और होम डिलीवरी',addr:'मुख्य सड़क, आपका शहर'},
+{n:'रियल एस्टेट',t:'visit',l:'band',c:'#164e63',name:'विश्वास प्रॉपर्टीज',role:'आपके सपनों का सही पता',svc:'प्लॉट और मकान\nखरीद • बिक्री • किराया\nप्रॉपर्टी कंसल्टेंसी',addr:'आपका शहर, उत्तराखंड'},
+{n:'फोटोग्राफी',t:'visit',l:'dark',c:'#6d28d9',name:'मोमेंट्स स्टूडियो',role:'हर पल को यादगार बनाएं',svc:'शादी एवं इवेंट शूट\nपोर्ट्रेट और पासपोर्ट फोटो\nवीडियो एडिटिंग',addr:'स्टेशन रोड, आपका शहर'},
+{n:'ब्यूटी / मेकअप',t:'shop',l:'top',c:'#be185d',name:'ग्रेस ब्यूटी स्टूडियो',role:'आपकी खूबसूरती, हमारा हुनर',svc:'ब्राइडल मेकअप\nहेयर एवं स्किन केयर\nअपॉइंटमेंट उपलब्ध',addr:'मार्केट रोड, आपका शहर'},
+{n:'कोचिंग / शिक्षा',t:'visit',l:'band',c:'#1d4ed8',name:'उज्ज्वल करियर अकादमी',role:'सीखें आज • बढ़ें कल',svc:'प्रतियोगी परीक्षाएं\nस्कूल ट्यूशन\nऑनलाइन एवं ऑफलाइन कक्षाएं',addr:'आपका शहर'},
+{n:'टैक्सी / ट्रैवल',t:'visit',l:'dark',c:'#0f766e',name:'हिमालय ट्रैवल्स',role:'सुरक्षित सफर, भरोसे के साथ',svc:'लोकल एवं आउटस्टेशन\nएयरपोर्ट पिकअप\nटूर पैकेज',addr:'हल्द्वानी, उत्तराखंड'},
+{n:'इलेक्ट्रॉनिक्स',t:'shop',l:'top',c:'#334155',name:'आर्य इलेक्ट्रॉनिक्स',role:'टेक्नोलॉजी और भरोसा',svc:'इलेक्ट्रॉनिक सामान\nइंस्टॉलेशन सहायता\nरिपेयर एवं सर्विस',addr:'मुख्य बाज़ार, आपका शहर'}];
+var tp=$('tpl');T.forEach(function(o){var b=document.createElement('button');b.textContent=o.n;b.style.setProperty('--tpl-color',o.c);b.style.borderLeftColor=o.c;b.onclick=function(){
+ Array.prototype.forEach.call(tp.children,function(c){c.classList.remove('active')});b.classList.add('active');
+ document.querySelector('input[name=type][value='+o.t+']').checked=true;$('lay').value=o.l;color=o.c;cc.value=o.c;
+ ids.slice(0,5).forEach(function(i){$(i).value=o[i]==null?(i==='phone'?$('phone').value:''):o[i]});side=0;$('sidelbl').textContent='फ्रंट';save();draw()};tp.appendChild(b)});
+function snap(s){var o=side;side=s;draw();var u=cv.toDataURL('image/png');side=o;draw();return u}
+function save(){try{var d={color:color,type:type()};ids.forEach(function(i){d[i]=$(i).value});localStorage.setItem('shopcard',JSON.stringify(d))}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem('shopcard')||'null');if(!d)return;ids.forEach(function(i){if(d[i]!=null)$(i).value=d[i]});if(d.color){color=d.color;cc.value=color}var r=document.querySelector('input[name=type][value='+d.type+']');if(r)r.checked=true}catch(e){}}
+function sheet(){
+ var f=snap(0),b=snap(1),w=window.open('','_blank');
+ if(!w){alert('पॉप-अप की अनुमति दें');return}
+ var g=function(u){var s='';for(var i=0;i<10;i++)s+='<img src="'+u+'">';return '<div class="g">'+s+'</div>'};
+ w.document.write('<!DOCTYPE html><title>A4 कार्ड शीट</title><style>@page{size:A4;margin:0}body{margin:0}.g{width:210mm;height:297mm;display:grid;grid-template-columns:repeat(2,90mm);grid-auto-rows:54mm;justify-content:center;align-content:center;page-break-after:always}img{width:90mm;height:54mm;outline:.1mm dashed #999}</style>'+g(f)+g(b)+'<script>onload=function(){setTimeout(print,300)}<\/script>');
+ w.document.close();
+}
+$('logo').onchange=function(e){var f=e.target.files[0];if(!f)return;var u=URL.createObjectURL(f),i=new Image();i.onload=function(){img=i;draw()};i.src=u};
+$('flip').onclick=function(){side=side?0:1;$('sidelbl').textContent=side?'बैक':'फ्रंट';draw()};
+$('png').onclick=function(){var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='card-'+(side?'back':'front')+'.png';a.click()};
+$('pdf').onclick=function(){sheet()};
+$('a4').onclick=function(){sheet()};
+document.addEventListener('input',function(){save();draw()});
+document.addEventListener('change',function(){save();draw()});
+load();draw();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>

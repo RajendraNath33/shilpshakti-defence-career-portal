@@ -4,7 +4,7 @@
    - news.json: network-first (always fetch the latest job postings first).
    - Other static assets: stale-while-revalidate for instant repeat loads. */
 
-const CACHE = 'shilpshakti-v1';
+const CACHE = 'shilpshakti-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -34,6 +34,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
+    if (url.pathname.startsWith('/card-maker/')) return;
     event.respondWith(
       fetch(request)
         .then((response) => {
