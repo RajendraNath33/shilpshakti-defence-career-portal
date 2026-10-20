@@ -44,6 +44,8 @@ export default function Header({
     { href: '#csc', label: t.nav.cscAssist },
     { href: '#ppt', label: t.nav.pptGenerator },
     { href: '#govt-links', label: t.nav.govtLinks },
+    { href: '/card-maker/shop-card.html', label: t.nav.cardMaker },
+    { href: '/card-maker/aadhaar-tool.html', label: t.nav.govCardTool },
   ];
 
   const toggleLang = (l: Lang) => setLang(l);
