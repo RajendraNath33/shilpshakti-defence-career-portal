@@ -103,21 +103,28 @@ export default function CSCForm() {
     setError('');
     setSubmitting(true);
 
-    window.setTimeout(() => {
-      const entry: StoredRequest = {
-        ref: `SS-${Date.now().toString(36).toUpperCase().slice(-6)}`,
-        name: name.trim(),
-        phone: phone.trim(),
-        services: [...selected],
-        total,
-        date: apptDate,
-        slot: apptSlot,
-        createdAt: Date.now(),
-      };
-      writeStore([entry, ...readStore()].slice(0, 40));
-      setReceipt(entry);
-      setSubmitting(false);
-    }, 700);
+    const entry: StoredRequest = {
+      ref: `SS-${Date.now().toString(36).toUpperCase().slice(-6)}`,
+      name: name.trim(),
+      phone: phone.trim(),
+      services: [...selected],
+      total,
+      date: apptDate,
+      slot: apptSlot,
+      createdAt: Date.now(),
+    };
+    fetch('/hooks/csc-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        writeStore([entry, ...readStore()].slice(0, 40));
+        setReceipt(entry);
+      })
+      .catch(() => setError('Request could not be sent. Please try again. / अनुरोध नहीं भेजा जा सका, कृपया दोबारा प्रयास करें।'))
+      .finally(() => setSubmitting(false));
   };
 
   const reset = () => {
