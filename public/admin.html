@@ -159,14 +159,31 @@
   // (recommended, see setup notes), leave it as the relative path below.
   // Otherwise replace with your full n8n URL, e.g.
   // "https://your-vm-ip:5679/webhook/shilpshakti-admin"
-  const WEBHOOK_URL = 'https://n8n.shilpshakti.org.in/webhook/shilpshakti-admin';
+  const WEBHOOK_URL = '/hooks/admin';
   // =========================
 
   let ADMIN_PASSWORD = '';
 
-  function unlock() {
+  async function readJson(res) {
+    if (res.status === 403) return { success: false, error: 'Galat password' };
+    if (res.status === 429) return { success: false, error: 'Bahut zyada koshish, thodi der baad try karo' };
+    return res.json();
+  }
+
+  async function unlock() {
     const pw = document.getElementById('pwInput').value;
     if (!pw) return;
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': pw },
+        body: JSON.stringify({ action: 'ping' }),
+      });
+      if (res.status === 403) { alert('Galat password'); return; }
+      if (res.status === 429) { alert('Bahut zyada koshish. Thodi der baad try karo.'); return; }
+      if (!res.ok && res.status !== 400) { alert('Server error: ' + res.status); return; }
+
+    } catch (e) { alert('Network error'); return; }
     ADMIN_PASSWORD = pw;
     document.getElementById('unlockCard').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -198,7 +215,6 @@
   async function submitJob() {
     const payload = {
       action: 'add',
-      password: ADMIN_PASSWORD,
       id: document.getElementById('jobId').value || undefined,
       cat: document.getElementById('cat').value,
       deadlineISO: document.getElementById('deadlineISO').value,
@@ -223,10 +239,10 @@
     try {
       const res = await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_PASSWORD },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) {
         setStatus('Saved ✓', 'ok');
         resetForm();
@@ -261,10 +277,10 @@
     try {
       const res = await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', password: ADMIN_PASSWORD, id }),
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_PASSWORD },
+        body: JSON.stringify({ action: 'delete', id }),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) {
         loadJobs();
       } else {
@@ -275,11 +291,17 @@
     }
   }
 
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
   async function loadJobs() {
     const list = document.getElementById('jobList');
     try {
       const res = await fetch('/news.json', { cache: 'no-store' });
-      const data = await res.json();
+      const data = await readJson(res);
       const manual = (data.en || []).filter((j) => j.isManual);
       if (!manual.length) {
         list.innerHTML = '<div class="hint">Abhi koi manual job nahi hai.</div>';
@@ -290,15 +312,15 @@
           (j) => `
         <div class="job-item">
           <div>
-            <strong>${j.title}</strong> — ${j.org}
-            <div class="job-meta">${j.location} • ${j.deadline} • ${j.days} days left</div>
+            <strong>${esc(j.title)}</strong> — ${esc(j.org)}
+            <div class="job-meta">${esc(j.location)} • ${esc(j.deadline)} • ${esc(j.days)} days left</div>
           </div>
           <div class="job-actions">
-            <button class="btn-ghost" onclick='editJob(${JSON.stringify({
+            <button class="btn-ghost" onclick="editJob(${esc(JSON.stringify({
               id: j.id, cat: j.cat, deadlineISO: j.deadlineISO, posts: j.posts,
               titleEn: j.title, orgEn: j.org, locationEn: j.location, tagsEn: (j.tags||[]).join(', ')
-            })})'>Edit</button>
-            <button class="btn-danger" onclick="deleteJob('${j.id}')">Delete</button>
+            }))})">Edit</button>
+            <button class="btn-danger" onclick="deleteJob(${esc(JSON.stringify(j.id))})">Delete</button>
           </div>
         </div>`
         )
