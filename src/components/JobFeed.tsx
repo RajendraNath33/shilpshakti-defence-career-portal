@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLang } from '../i18n';
-import { useDynamicJobs } from '../hooks/useDynamicJobs';
+import { useDynamicJobs, type DynamicJob } from '../hooks/useDynamicJobs';
 import Reveal from './Reveal';
 import { IconPin, IconClock, IconBriefcase, IconArrowRight, IconStar } from './icons';
 
@@ -11,7 +11,7 @@ export default function JobFeed() {
   const [cat, setCat] = useState<Cat>('all');
 
   const { jobs: dynamicJobs, updatedAt } = useDynamicJobs(lang);
-  const jobs = [...dynamicJobs, ...t.jobs.jobs];
+  const jobs: DynamicJob[] = [...dynamicJobs, ...(t.jobs.jobs as DynamicJob[])];
   const filtered = cat === 'all' ? jobs : jobs.filter((j) => j.cat === cat);
 
   const tabs: { id: Cat; label: string; count: number }[] = [

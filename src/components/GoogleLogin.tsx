@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-const GOOGLE_CLIENT_ID = '557804189885-jqr788bjl7qri6b8kflnam4aaq1utlj1.apps.googleusercontent.com';
-const N8N_LOGIN_WEBHOOK = 'https://n8n.shilpshakti.org.in/webhook/shilpshakti-user-login';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '557804189885-jqr788bjl7qri6b8kflnam4aaq1utlj1.apps.googleusercontent.com';
+const N8N_LOGIN_WEBHOOK = import.meta.env.VITE_N8N_LOGIN_WEBHOOK || 'https://n8n.shilpshakti.org.in/webhook/shilpshakti-user-login';
 
 interface GoogleUser {
   name: string;

@@ -77,6 +77,7 @@ const en = {
       {
         cat: 'esm' as const,
         isNew: true,
+        title: 'Bank Security Guard (ESM)',
         org: 'Public Sector Bank, Haldwani',
         location: 'Haldwani, Uttarakhand',
         deadline: '28 Feb 2026',
