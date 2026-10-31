@@ -63,7 +63,7 @@ button.p{background:var(--acc);border-color:var(--acc);color:#fff}
 CV और रोज़गार सहायता</textarea>
 <label for="logo">लोगो / फोटो</label><input type="file" id="logo" accept="image/*">
 </fieldset>
-<p class="note">सारी जानकारी सिर्फ़ आपके ब्राउज़र में रहती है, कहीं भेजी नहीं जाती। लोगो/फोटो सेव नहीं होता, दोबारा चुनना होगा।</p>
+<p class="note">सारी जानकारी सिर्फ़ आपके ब्राउज़र में रहती है, ऑर्डर करने पर ही जानकारी भेजी जाती है। लोगो/फोटो सेव नहीं होता, दोबारा चुनना होगा।</p>
 </section>
 <section class="stage" aria-label="प्रीव्यू">
 <canvas id="cv" width="1050" height="630" role="img" aria-label="कार्ड प्रीव्यू"></canvas>
@@ -73,7 +73,10 @@ CV और रोज़गार सहायता</textarea>
 <button class="b p" id="png">PNG डाउनलोड (300 DPI)</button>
 <button class="b" id="pdf">PDF के लिए प्रिंट</button>
 <button class="b" id="a4">A4 पर 10 कार्ड</button>
+<button class="b p" id="order">प्रिंट के लिए ऑर्डर करें</button>
 </div>
+<label style="display:block;margin:8px 0"><input type="checkbox" id="consent"> मैं सहमत हूँ कि मेरी जानकारी ऑर्डर के लिए भेजी जाए</label>
+<p class="note" id="ordmsg" role="status"></p>
 <p class="note">PDF के लिए प्रिंट विंडो में "Save as PDF" चुनें। A4 शीट में पहले पेज पर फ्रंट और दूसरे पर बैक आता है।</p>
 </section>
 </main>
@@ -161,6 +164,26 @@ $('flip').onclick=function(){side=side?0:1;$('sidelbl').textContent=side?'बै
 $('png').onclick=function(){var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='card-'+(side?'back':'front')+'.png';a.click()};
 $('pdf').onclick=function(){sheet()};
 $('a4').onclick=function(){sheet()};
+$('order').onclick=function(){
+var m=$('ordmsg'),btn=$('order');
+var ph=$('phone').value.replace(/\D/g,'').replace(/^91(?=\d{10}$)/,'');
+var nm=$('name').value.trim();
+if(!nm){m.textContent='कृपया नाम भरें।';return}
+if(!/^[6-9]\d{9}$/.test(ph)){m.textContent='कृपया सही 10 अंकों का मोबाइल नंबर भरें।';return}
+if(!$('consent').checked){m.textContent='ऑर्डर के लिए सहमति ज़रूरी है।';return}
+var notes='रंग: '+color+' | भूमिका: '+$('role').value+' | पता: '+$('addr').value+' | सेवाएं: '+$('svc').value.replace(/\n/g,', ');
+btn.disabled=true;m.textContent='भेजा जा रहा है...';
+fetch('/hooks/card-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nm,phone:ph,cardType:type(),template:$('lay').value,lang:document.documentElement.lang==='en'?'en':'hi',notes:notes,consent:true})})
+.then(function(r){return r.json().catch(function(){return {}}).then(function(b){return {c:r.status,ok:r.ok,b:b}})})
+.then(function(x){
+if(x.b.status==='duplicate'||x.c===409){m.textContent='यह ऑर्डर पहले ही भेजा जा चुका है। हम जल्द संपर्क करेंगे।'}
+else if(x.c===429){m.textContent='बहुत ज़्यादा प्रयास। कुछ देर बाद दोबारा करें।'}
+else if(x.ok&&x.b.status!=='invalid'){m.textContent='ऑर्डर मिल गया! हम जल्द आपसे संपर्क करेंगे।'}
+else{m.textContent='ऑर्डर नहीं भेजा जा सका। जानकारी जाँचकर दोबारा प्रयास करें।'}
+})
+.catch(function(){m.textContent='नेटवर्क समस्या। दोबारा प्रयास करें।'})
+.then(function(){btn.disabled=false});
+};
 document.addEventListener('input',function(){save();draw()});
 document.addEventListener('change',function(){save();draw()});
 load();draw();
