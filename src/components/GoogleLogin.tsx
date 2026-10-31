@@ -80,7 +80,7 @@ export default function GoogleLoginButton({ compact = false }: { compact?: boole
 
   if (user) {
     return (
-      <div className="flex items-center gap-2">
+      <div key="g-user" className="flex items-center gap-2">
         <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full border border-gold-400/60" referrerPolicy="no-referrer" />
         <span className="hidden sm:inline text-cream-100 text-[12.5px] font-medium truncate max-w-[110px]">{user.name}</span>
         <button
@@ -94,5 +94,5 @@ export default function GoogleLoginButton({ compact = false }: { compact?: boole
     );
   }
 
-  return <div ref={btnRef} />;
+  return <div key="g-btn" ref={btnRef} />;
 }
