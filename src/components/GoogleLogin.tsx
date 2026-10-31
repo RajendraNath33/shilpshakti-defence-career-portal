@@ -60,7 +60,7 @@ export default function GoogleLoginButton({ compact = false }: { compact?: boole
         fetch(N8N_LOGIN_WEBHOOK, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newUser),
+          body: JSON.stringify({ ...newUser, credential: response.credential }),
         }).catch(() => {});
       },
     });
