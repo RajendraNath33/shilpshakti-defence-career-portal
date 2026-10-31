@@ -85,7 +85,7 @@ export default function Header({
             </a>
 
             {/* Desktop nav */}
-            <nav className="hidden xl:flex items-center gap-0.5" aria-label="Primary">
+            <nav className="hidden 2xl:flex items-center gap-0.5" aria-label="Primary">
               {links.map((l) => (
                 <a
                   key={l.href}
@@ -137,14 +137,14 @@ export default function Header({
                 <GoogleLoginButton compact />
               </div>
 
-              <a href="#cv" className="hidden xl:inline-flex items-center gap-2 btn-stamp bg-gold-400 text-camo-950 font-display font-semibold uppercase tracking-[0.1em] text-[13px] px-5 py-2.5 rounded-sm">
+              <a href="#cv" className="hidden 2xl:inline-flex items-center gap-2 btn-stamp bg-gold-400 text-camo-950 font-display font-semibold uppercase tracking-[0.1em] text-[13px] px-5 py-2.5 rounded-sm">
                 {t.nav.getStarted}
                 <IconChevron width={15} height={15} strokeWidth={2.4} />
               </a>
 
               <button
                 type="button"
-                className="xl:hidden inline-flex items-center justify-center w-10 h-10 rounded-sm border border-camo-600 text-cream-100 hover:text-gold-300 hover:border-gold-400/60 transition-colors"
+                className="2xl:hidden inline-flex items-center justify-center w-10 h-10 rounded-sm border border-camo-600 text-cream-100 hover:text-gold-300 hover:border-gold-400/60 transition-colors"
                 onClick={() => setMenuOpen(true)}
                 aria-expanded={menuOpen}
                 aria-label="Open navigation menu"
@@ -157,7 +157,7 @@ export default function Header({
       </header>
 
       {/* ---------- Mobile drawer ---------- */}
-      <div className={`xl:hidden fixed inset-0 z-50 ${menuOpen ? '' : 'pointer-events-none'}`} aria-hidden={!menuOpen}>
+      <div className={`2xl:hidden fixed inset-0 z-50 ${menuOpen ? '' : 'pointer-events-none'}`} aria-hidden={!menuOpen}>
         {/* Scrim */}
         <div
           onClick={() => setMenuOpen(false)}
